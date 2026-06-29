@@ -1,4 +1,6 @@
-# Texas Hold'em Core
+# NCCTexas
+
+Texas Hold'em core and test table built with Godot 4.
 
 Copy this folder to `res://scripts/poker/` in a Godot 4 project.
 

@@ -47,7 +47,7 @@ func _build_ui() -> void:
 	_center_fixed(stage, Vector2(1280, 700), Vector2(0, -18))
 
 	var logo: Label = Label.new()
-	logo.text = "POKER IDLE"
+	logo.text = "NCCTEXAS"
 	logo.add_theme_font_size_override("font_size", 18)
 	logo.add_theme_color_override("font_color", Color(0.92, 0.92, 0.88))
 	stage.add_child(logo)
