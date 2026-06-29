@@ -1,167 +1,197 @@
 # NCCTexas
 
-NCCTexas is a Godot 4 Texas Hold'em project. It includes a poker core, a playable test table scene, and regression tests for the game logic.
+NCCTexas 是一个使用 Godot 4 开发的德州扑克项目，包含德州扑克核心逻辑、可运行的测试牌桌界面，以及用于验证规则和界面的回归测试。
 
-## Requirements
+## 环境要求
 
-- Godot 4.7 or newer in the Godot 4 series.
-- Git.
-- Optional: Codex, ChatGPT, Cursor, Claude Code, or another AI coding tool for assisted development.
+- Godot 4.7 或更新的 Godot 4 版本。
+- Git。
+- 可选：ChatGPT、Cursor、Claude Code 等 AI 编程工具。
 
-This project uses GDScript and does not require the Godot .NET/C# build.
+本项目使用 GDScript，不需要 Godot .NET/C# 版本。
 
-## Download Godot
+## 下载 Godot
 
-Use the official Godot download page:
+请从 Godot 官方页面下载：
 
-- All platforms: https://godotengine.org/download/
-- Windows: https://godotengine.org/download/windows/
-- macOS: https://godotengine.org/download/macos/
-- Linux: https://godotengine.org/download/linux/
-- Android editor: https://godotengine.org/download/android/
-- Web editor: https://editor.godotengine.org/
+- 全平台入口：https://godotengine.org/download/
+- Windows：https://godotengine.org/download/windows/
+- macOS：https://godotengine.org/download/macos/
+- Linux：https://godotengine.org/download/linux/
+- Android 编辑器：https://godotengine.org/download/android/
+- Web 编辑器：https://editor.godotengine.org/
 
-Recommended choices:
+不同平台建议：
 
-- Windows: download the standard Godot Engine 4.x `x86_64` build, unzip it, and run the executable.
-- macOS: download the standard Godot Engine 4.x build for your Mac, open the app, and allow it in System Settings if macOS blocks the first launch.
-- Linux: download the standard Godot Engine 4.x build, extract it, make the binary executable if needed, and run it.
+- Windows：下载标准版 Godot Engine 4.x `x86_64`，解压后运行可执行文件。
+- macOS：下载适合当前 Mac 的标准版 Godot Engine 4.x，打开应用。如果首次启动被系统拦截，请在系统设置中允许打开。
+- Linux：下载标准版 Godot Engine 4.x，解压后运行。如果无法启动，先给二进制文件添加可执行权限。
 
-Godot is self-contained, so there is usually no separate installer. The .NET/C# build is only needed for C# projects; NCCTexas does not need it.
+Godot 通常是免安装的独立程序。只有 C# 项目才需要 .NET/C# 版本，NCCTexas 不需要。
 
-## Get the Project
+## 获取项目
 
-Clone the repository:
+克隆仓库：
 
 ```sh
 git clone https://github.com/jintianwenwenzaoshuilema/NCCTexas.git
 cd NCCTexas
 ```
 
-Or, if you already have the project locally:
+如果本地已经有项目：
 
 ```sh
 cd /Users/zlw/NCCTexas
 git pull
 ```
 
-## Open and Run
+## 打开和运行
 
-1. Open Godot.
-2. Click `Import`.
-3. Select this project's `project.godot` file.
-4. Open the imported project.
-5. Press `F5` or click the play button.
+1. 打开 Godot。
+2. 点击 `Import`。
+3. 选择本项目的 `project.godot` 文件。
+4. 打开导入后的项目。
+5. 按 `F5`，或点击右上角运行按钮。
 
-The main scene is configured in `project.godot`, so Godot should start the poker test table directly.
+主场景已经在 `project.godot` 中配置好，运行项目后会直接进入德州扑克测试牌桌。
 
-You can also run from the command line:
+也可以在命令行运行：
 
 ```sh
 godot --path .
 ```
 
-If your Godot binary has a versioned name, use that command instead, for example:
+如果你的 Godot 命令叫 `godot4`，则使用：
 
 ```sh
 godot4 --path .
 ```
 
-## Run Tests
+## 运行测试
 
-Run the poker core tests:
+运行核心规则测试：
 
 ```sh
 godot --headless --path . -s res://tests/poker_core_tests.gd
 ```
 
-Run the UI smoke test:
+运行 UI 冒烟测试：
 
 ```sh
 godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
 ```
 
-If your executable is named `godot4`, replace `godot` with `godot4`.
+如果你的 Godot 命令叫 `godot4`，把上面的 `godot` 替换成 `godot4`。
 
-## Project Layout
+## 项目结构
 
-- `project.godot`: Godot project configuration.
-- `scenes/poker_test.tscn`: Main test table scene.
-- `scenes/poker_test.gd`: Table UI and game interaction script.
-- `scenes/ui/card_view.tscn`: Card view scene.
-- `scenes/ui/card_view.gd`: Self-drawn card front, back, and empty-slot rendering.
-- `poker/`: Texas Hold'em core logic.
-- `tests/`: Headless regression and smoke tests.
+- `project.godot`：Godot 项目配置。
+- `scenes/poker_test.tscn`：主测试牌桌场景。
+- `scenes/poker_test.gd`：牌桌 UI 和交互逻辑。
+- `scenes/ui/card_view.tscn`：牌面视图场景。
+- `scenes/ui/card_view.gd`：自绘扑克牌正面、背面和空牌位。
+- `poker/`：德州扑克核心逻辑。
+- `tests/`：无界面回归测试和 UI 冒烟测试。
 
-## Development Workflow
+## 开发流程
 
-Before making changes:
+修改前：
 
 ```sh
 git status
 git pull
 ```
 
-After making changes:
+修改后：
 
 ```sh
 godot --headless --path . -s res://tests/poker_core_tests.gd
 godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
 git status
 git add .
-git commit -m "Describe the change"
+git commit -m "说明本次修改"
 git push
 ```
 
-Use focused commits. For example, keep visual card changes separate from poker rules changes when possible.
+建议保持提交聚焦。例如，牌面视觉调整和德州扑克规则修改尽量分成不同提交。
 
-## Developing with Codex or Other AI Tools
+## AI 辅助开发提示词
 
-AI tools work best when you give them the repository path, the current goal, and the verification command.
+使用 AI 工具辅助开发时，可以直接复制下面的提示词，并把方括号里的内容替换成当前任务。
 
-Example prompt:
+### 通用功能开发
 
 ```text
-We are working on the Godot 4 project at /Users/zlw/NCCTexas.
-Please inspect the project before editing. Implement [feature or bug fix].
-Afterward run:
-godot --headless --path . -s res://tests/poker_core_tests.gd
-godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
-Do not overwrite unrelated local changes.
+我们正在开发一个 Godot 4 德州扑克项目，项目路径是 /Users/zlw/NCCTexas。
+请先阅读项目结构和相关文件，再实现这个功能：[描述要实现的功能]。
+要求：
+1. 遵循现有 GDScript 风格。
+2. 不要覆盖无关的本地修改。
+3. 如果修改扑克规则，请补充或更新测试。
+4. 完成后运行：
+   godot --headless --path . -s res://tests/poker_core_tests.gd
+   godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
+5. 最后说明改了哪些文件、测试是否通过。
 ```
 
-Good tasks for AI assistance:
+### 修复 Bug
 
-- Refactor small parts of `poker/` while preserving test behavior.
-- Add focused tests for a specific poker rule.
-- Adjust UI layout in `scenes/poker_test.gd`.
-- Improve card rendering in `scenes/ui/card_view.gd`.
-- Update documentation after a feature lands.
+```text
+我们正在开发 Godot 4 项目 /Users/zlw/NCCTexas。
+现在有一个问题：[描述 Bug、复现步骤、期望结果和实际结果]。
+请先定位原因，再做最小范围修复。
+要求：
+1. 不要重构无关代码。
+2. 如果可以用测试覆盖，请添加回归测试。
+3. 修复后运行：
+   godot --headless --path . -s res://tests/poker_core_tests.gd
+   godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
+4. 最后说明根因、修复方式和验证结果。
+```
 
-Be careful with AI-generated changes:
+### 调整界面
 
-- Review `git diff` before committing.
-- Run the headless tests after logic changes.
-- Open the project in Godot after scene or UI changes.
-- Avoid broad rewrites unless the current behavior is well covered by tests.
-- Keep generated code consistent with the existing GDScript style.
+```text
+我们正在开发 Godot 4 德州扑克项目 /Users/zlw/NCCTexas。
+请调整牌桌界面：[描述 UI 调整目标]。
+相关文件可能包括 scenes/poker_test.gd、scenes/poker_test.tscn、scenes/ui/card_view.gd、scenes/ui/card_view.tscn。
+要求：
+1. 保持现有视觉风格一致。
+2. 不要影响德州扑克核心逻辑。
+3. 注意不同窗口尺寸下的布局稳定性。
+4. 修改后运行 UI 冒烟测试：
+   godot --headless --path . -s res://tests/poker_ui_smoke_test.gd
+5. 最后说明界面改动和验证结果。
+```
 
-## GitHub Authentication
+### 代码审查
 
-For pushing changes over HTTPS, configure Git and authenticate with GitHub:
+```text
+请审查 /Users/zlw/NCCTexas 当前工作区的修改。
+重点关注：
+1. 德州扑克规则是否有行为回归。
+2. Godot/GDScript 写法是否可靠。
+3. 是否缺少必要测试。
+4. 是否有会影响运行或导入项目的问题。
+请按严重程度列出问题，并给出具体文件和行号。
+```
+
+## GitHub 认证
+
+通过 HTTPS 推送代码时，可以先配置 Git 用户信息：
 
 ```sh
-git config --global user.name "Your GitHub username"
-git config --global user.email "your-email@example.com"
+git config --global user.name "你的 GitHub 用户名"
+git config --global user.email "你的邮箱@example.com"
 git config --global credential.helper osxkeychain
 ```
 
-Then push:
+然后在项目目录推送：
 
 ```sh
 git push
 ```
 
-When GitHub asks for a password, use a GitHub personal access token instead of your GitHub account password.
+如果 GitHub 询问密码，请使用 GitHub personal access token，而不是 GitHub 登录密码。
 
-SSH authentication also works, but it is optional.
+SSH 认证也可以使用，但不是必须的。
