@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cardviewholdthem"]
+
+[ext_resource type="Script" path="res://scenes/ui/card_view.gd" id="1_card"]
+
+[node name="CardView" type="PanelContainer"]
+custom_minimum_size = Vector2(64, 90)
+script = ExtResource("1_card")
