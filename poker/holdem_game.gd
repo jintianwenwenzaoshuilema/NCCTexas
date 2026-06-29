@@ -7,6 +7,7 @@ signal cards_dealt(player: HoldemPlayer, cards: Array)
 signal community_dealt(stage: String, cards: Array)
 signal action_required(player: HoldemPlayer, legal_actions: Dictionary)
 signal player_acted(player: HoldemPlayer, action: String, amount: int)
+signal player_rebought(player: HoldemPlayer, amount: int)
 signal pot_awarded(awards: Array)
 signal hand_finished(summary: Dictionary)
 
@@ -36,6 +37,7 @@ func setup(player_specs: Array, sb: int = 5, bb: int = 10) -> void:
 	stage = Stage.WAITING
 
 func start_hand() -> void:
+	_rebuy_broke_players()
 	assert(_active_seat_count() >= 2, "At least two players with chips are required.")
 	community_cards.clear()
 	deck.reset()
@@ -140,6 +142,12 @@ func _post_blinds() -> void:
 	players[sb_index].commit(small_blind)
 	players[bb_index].commit(big_blind)
 	emit_signal("blinds_posted", players[sb_index], players[bb_index])
+
+func _rebuy_broke_players() -> void:
+	for player in players:
+		var amount: int = player.rebuy_if_broke()
+		if amount > 0:
+			emit_signal("player_rebought", player, amount)
 
 func _deal_hole_cards() -> void:
 	for _round in range(2):

@@ -8,6 +8,7 @@ func _init() -> void:
 	_test_odd_chip_starts_left_of_dealer()
 	_test_legal_actions_for_short_stacks()
 	_test_heads_up_flow_reaches_flop()
+	_test_broke_players_rebuy_before_next_hand()
 
 	if _failures.is_empty():
 		print("All poker core tests passed.")
@@ -135,6 +136,26 @@ func _test_heads_up_flow_reaches_flop() -> void:
 	_expect_equal(game.stage, HoldemGame.Stage.FLOP, "Completed preflop betting advances to the flop.")
 	_expect_equal(game.community_cards.size(), 3, "The flop deals three community cards.")
 	_expect_equal(game.current_player().id, "Villain", "Heads-up postflop action starts left of the button.")
+
+func _test_broke_players_rebuy_before_next_hand() -> void:
+	var game: HoldemGame = HoldemGame.new()
+	game.setup([
+		{"id": "Hero", "chips": 1000},
+		{"id": "Villain", "chips": 1000},
+	], 5, 10)
+	game.players[0].chips = 0
+	var rebuy_events: Array = []
+	game.player_rebought.connect(func(player: HoldemPlayer, amount: int) -> void:
+		rebuy_events.append({"id": player.id, "amount": amount, "total_buy_in": player.total_buy_in})
+	)
+
+	game.start_hand()
+
+	_expect_equal(game.players[0].chips, 995, "Broke small blind rebuys before posting the blind.")
+	_expect_equal(game.players[0].total_buy_in, 2000, "Rebuy is added to the player's total buy-in.")
+	_expect_equal(rebuy_events.size(), 1, "A rebuy event is emitted for the broke player.")
+	_expect_equal(rebuy_events[0]["id"], "Hero", "The rebuy event identifies the broke player.")
+	_expect_equal(rebuy_events[0]["amount"], 1000, "The rebuy event reports the rebuy amount.")
 
 func _card(rank: int, suit: int) -> HoldemCard:
 	return HoldemCard.new(rank, suit)

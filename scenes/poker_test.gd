@@ -266,6 +266,13 @@ func _make_player_seat(id: String, subtitle: String) -> PanelContainer:
 	chips.add_theme_color_override("font_color", Color.WHITE)
 	info.add_child(chips)
 
+	var buy_in: Label = Label.new()
+	buy_in.name = "BuyIn"
+	buy_in.text = "Buy-in 0"
+	buy_in.add_theme_font_size_override("font_size", 11)
+	buy_in.add_theme_color_override("font_color", Color(0.76, 0.72, 0.58))
+	info.add_child(buy_in)
+
 	var state: Label = Label.new()
 	state.name = "State"
 	state.text = subtitle
@@ -283,6 +290,7 @@ func _connect_game_signals() -> void:
 	game.community_dealt.connect(_on_community_dealt)
 	game.action_required.connect(_on_action_required)
 	game.player_acted.connect(_on_player_acted)
+	game.player_rebought.connect(_on_player_rebought)
 	game.pot_awarded.connect(_on_pot_awarded)
 	game.hand_finished.connect(_on_hand_finished)
 
@@ -337,6 +345,10 @@ func _on_player_acted(player: HoldemPlayer, action: String, amount: int) -> void
 	if amount > 0:
 		suffix = " %s" % amount
 	_log("%s: %s%s" % [player.id, action, suffix])
+	_refresh_ui()
+
+func _on_player_rebought(player: HoldemPlayer, amount: int) -> void:
+	_log("%s buys in for %s. Total buy-in: %s." % [player.id, amount, player.total_buy_in])
 	_refresh_ui()
 
 func _on_pot_awarded(awards: Array) -> void:
@@ -410,10 +422,12 @@ func _refresh_player(player: HoldemPlayer) -> void:
 	var card_row: HBoxContainer = box.get_node("Cards") as HBoxContainer
 	var info: VBoxContainer = box.get_child(1) as VBoxContainer
 	var chips: Label = info.get_node("Chips") as Label
+	var buy_in: Label = info.get_node("BuyIn") as Label
 	var state: Label = info.get_node("State") as Label
 	var reveal: bool = player.id == HERO_ID or game.stage in [HoldemGame.Stage.SHOWDOWN, HoldemGame.Stage.FINISHED]
 	_fill_card_row(card_row, player.hole_cards, reveal, 2)
 	chips.text = "%s" % player.chips
+	buy_in.text = "Buy-in %s" % player.total_buy_in
 	state.text = "%s  Bet %s  In %s" % [_player_state(player), player.current_bet, player.total_committed]
 
 func _fill_card_row(row: HBoxContainer, cards: Array, revealed: bool, slot_count: int) -> void:

@@ -4,6 +4,8 @@ extends RefCounted
 var id: String
 var seat_index: int
 var chips: int
+var starting_chips: int
+var total_buy_in: int
 var hole_cards: Array = []
 
 var current_bet: int = 0
@@ -15,6 +17,8 @@ var has_acted: bool = false
 func _init(player_id: String = "", starting_chips: int = 0, seat: int = 0) -> void:
 	id = player_id
 	chips = starting_chips
+	self.starting_chips = starting_chips
+	total_buy_in = starting_chips
 	seat_index = seat
 
 func reset_for_hand() -> void:
@@ -45,3 +49,12 @@ func receive(amount: int) -> void:
 	chips += maxi(amount, 0)
 	if chips > 0:
 		is_all_in = false
+
+func rebuy_if_broke() -> int:
+	if chips > 0:
+		return 0
+	var amount: int = starting_chips
+	chips += amount
+	total_buy_in += amount
+	is_all_in = false
+	return amount
