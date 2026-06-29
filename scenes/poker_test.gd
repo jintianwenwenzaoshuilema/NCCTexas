@@ -1,6 +1,7 @@
 extends Control
 
 const HERO_ID: String = "Hero"
+const DESIGN_SIZE: Vector2 = Vector2(1920, 1080)
 const CARD_VIEW_SCENE: PackedScene = preload("res://scenes/ui/card_view.tscn")
 
 var game: HoldemGame = HoldemGame.new()
@@ -20,9 +21,12 @@ var all_in_button: Button
 var confirm_button: Button
 var raise_amount: SpinBox
 var stage: Control
+var ui_scale: float = 1.0
 
 func _ready() -> void:
 	_build_ui()
+	resized.connect(_on_resized)
+	_apply_ui_scale()
 	_connect_game_signals()
 	_start_new_table()
 
@@ -41,10 +45,9 @@ func _build_ui() -> void:
 
 	stage = Control.new()
 	stage.name = "TableStage"
-	stage.set_anchors_preset(Control.PRESET_CENTER)
-	stage.custom_minimum_size = Vector2(1280, 700)
+	stage.set_anchors_preset(Control.PRESET_FULL_RECT)
+	stage.custom_minimum_size = DESIGN_SIZE
 	add_child(stage)
-	_center_fixed(stage, Vector2(1280, 700), Vector2(0, -18))
 
 	var logo: Label = Label.new()
 	logo.text = "NCCTEXAS"
@@ -133,13 +136,13 @@ func _build_ui() -> void:
 	stage.add_child(_make_player_seat("BotB", "Side seat"))
 	_pin(player_panels["BotB"], 0.760, 0.355, 0.960, 0.535)
 
-	add_child(_make_player_seat(HERO_ID, "You"))
+	stage.add_child(_make_player_seat(HERO_ID, "You"))
 	_pin(player_panels[HERO_ID], 0.410, 0.745, 0.630, 0.965)
 
 	var action_panel: PanelContainer = PanelContainer.new()
 	action_panel.name = "ActionPanel"
 	action_panel.add_theme_stylebox_override("panel", _style(Color(0.055, 0.060, 0.064, 0.95), Color(0.30, 0.34, 0.33, 0.9), 2, 14))
-	add_child(action_panel)
+	stage.add_child(action_panel)
 	_pin(action_panel, 0.685, 0.735, 0.980, 0.965)
 
 	var action_box: VBoxContainer = VBoxContainer.new()
@@ -192,7 +195,7 @@ func _build_ui() -> void:
 	action_log.bbcode_enabled = false
 	action_log.scroll_following = true
 	action_log.add_theme_stylebox_override("normal", _style(Color(0.045, 0.047, 0.050, 0.94), Color(0.20, 0.22, 0.22, 0.8), 1, 10))
-	add_child(action_log)
+	stage.add_child(action_log)
 	_pin(action_log, 0.025, 0.775, 0.385, 0.965)
 
 	fold_button.pressed.connect(func() -> void: _hero_act("fold"))
@@ -438,6 +441,7 @@ func _fill_card_row(row: HBoxContainer, cards: Array, revealed: bool, slot_count
 	for index in range(slot_count):
 		var card_view: PanelContainer = CARD_VIEW_SCENE.instantiate() as PanelContainer
 		row.add_child(card_view)
+		card_view.call("set_ui_scale", ui_scale)
 		if index < cards.size():
 			var card: HoldemCard = cards[index] as HoldemCard
 			if revealed:
@@ -526,6 +530,72 @@ func _cards_to_text(cards: Array) -> String:
 func _log(message: String) -> void:
 	action_log.append_text(message + "\n")
 
+func _on_resized() -> void:
+	_apply_ui_scale()
+	if not game.players.is_empty():
+		_refresh_ui()
+
+func _apply_ui_scale() -> void:
+	ui_scale = _calculate_ui_scale()
+	if board_cards != null:
+		board_cards.add_theme_constant_override("separation", _scaled_int(6))
+	if action_log != null:
+		action_log.add_theme_font_size_override("normal_font_size", _scaled_int(16))
+		action_log.add_theme_stylebox_override("normal", _style(Color(0.045, 0.047, 0.050, 0.94), Color(0.20, 0.22, 0.22, 0.8), 1, 10))
+	if fold_button != null:
+		_apply_action_button_scale(fold_button)
+		_apply_action_button_scale(check_call_button)
+		_apply_action_button_scale(bet_raise_button)
+		_apply_action_button_scale(all_in_button)
+		_apply_action_button_scale(confirm_button)
+	if raise_amount != null:
+		raise_amount.custom_minimum_size = _scaled_vec(Vector2(76, 40))
+		raise_amount.add_theme_font_size_override("font_size", _scaled_int(14))
+	for seat in player_panels.values():
+		_apply_player_seat_scale(seat as PanelContainer)
+	_update_hud_font_sizes()
+
+func _calculate_ui_scale() -> float:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return 1.0
+	return clamp(min(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y), 0.60, 1.55)
+
+func _update_hud_font_sizes() -> void:
+	if stage_label != null:
+		stage_label.add_theme_font_size_override("font_size", _scaled_int(14))
+	if status_label != null:
+		status_label.add_theme_font_size_override("font_size", _scaled_int(14))
+	if pot_label != null:
+		pot_label.add_theme_font_size_override("font_size", _scaled_int(24))
+
+func _apply_action_button_scale(button: Button) -> void:
+	if button == null:
+		return
+	button.custom_minimum_size = _scaled_vec(Vector2(84, 40))
+	button.add_theme_font_size_override("font_size", _scaled_int(14))
+
+func _apply_player_seat_scale(seat: PanelContainer) -> void:
+	if seat == null:
+		return
+	seat.add_theme_stylebox_override("panel", _style(Color(0.095, 0.098, 0.102, 0.88), Color(0.20, 0.22, 0.22, 0.75), 1, 8))
+	var box: HBoxContainer = seat.get_child(0) as HBoxContainer
+	box.add_theme_constant_override("separation", _scaled_int(8))
+	var card_row: HBoxContainer = box.get_node("Cards") as HBoxContainer
+	card_row.add_theme_constant_override("separation", _scaled_int(4))
+	var info: VBoxContainer = box.get_child(1) as VBoxContainer
+	info.add_theme_constant_override("separation", max(1, _scaled_int(1)))
+	(info.get_node("Name") as Label).add_theme_font_size_override("font_size", _scaled_int(17))
+	(info.get_node("Chips") as Label).add_theme_font_size_override("font_size", _scaled_int(20))
+	(info.get_node("BuyIn") as Label).add_theme_font_size_override("font_size", _scaled_int(11))
+	(info.get_node("State") as Label).add_theme_font_size_override("font_size", _scaled_int(11))
+
+func _scaled_int(value: int) -> int:
+	return maxi(1, roundi(value * ui_scale))
+
+func _scaled_vec(value: Vector2) -> Vector2:
+	return value * ui_scale
+
 func _pin(node: Control, left: float, top: float, right: float, bottom: float) -> void:
 	node.anchor_left = left
 	node.anchor_top = top
@@ -535,16 +605,6 @@ func _pin(node: Control, left: float, top: float, right: float, bottom: float) -
 	node.offset_top = 0
 	node.offset_right = 0
 	node.offset_bottom = 0
-
-func _center_fixed(node: Control, size: Vector2, offset: Vector2 = Vector2.ZERO) -> void:
-	node.anchor_left = 0.5
-	node.anchor_top = 0.5
-	node.anchor_right = 0.5
-	node.anchor_bottom = 0.5
-	node.offset_left = -size.x * 0.5 + offset.x
-	node.offset_top = -size.y * 0.5 + offset.y
-	node.offset_right = size.x * 0.5 + offset.x
-	node.offset_bottom = size.y * 0.5 + offset.y
 
 func _style(background: Color, border: Color, border_width: int, radius: int) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()

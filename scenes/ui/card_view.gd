@@ -16,9 +16,10 @@ const BLACK_SUIT: Color = Color(0.030, 0.036, 0.040)
 
 var stored_code: String = ""
 var stored_revealed: bool = true
+var ui_scale: float = 1.0
 
 func _ready() -> void:
-	custom_minimum_size = CARD_SIZE
+	custom_minimum_size = _scaled_size()
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -26,7 +27,13 @@ func _ready() -> void:
 	queue_redraw()
 
 func _get_minimum_size() -> Vector2:
-	return CARD_SIZE
+	return _scaled_size()
+
+func set_ui_scale(value: float) -> void:
+	ui_scale = max(value, 0.35)
+	custom_minimum_size = _scaled_size()
+	update_minimum_size()
+	queue_redraw()
 
 func set_card(card: HoldemCard, revealed: bool = true) -> void:
 	stored_code = card.code()
@@ -42,6 +49,9 @@ func set_empty() -> void:
 	stored_code = ""
 	stored_revealed = true
 	queue_redraw()
+
+func _scaled_size() -> Vector2:
+	return CARD_SIZE * ui_scale
 
 func _draw() -> void:
 	var rect: Rect2 = _card_rect()
@@ -68,7 +78,7 @@ func _card_rect() -> Rect2:
 
 func _draw_empty(rect: Rect2) -> void:
 	_draw_card_base(rect, EMPTY_BG, EMPTY_BORDER, 1, Color(0, 0, 0, 0.22))
-	var inset: Rect2 = rect.grow(-8)
+	var inset: Rect2 = rect.grow(-8 * ui_scale)
 	draw_arc(inset.get_center(), min(inset.size.x, inset.size.y) * 0.26, 0.0, TAU, 48, Color(0.26, 0.34, 0.31, 0.55), 1.4, true)
 
 func _draw_face(rect: Rect2) -> void:
@@ -78,36 +88,36 @@ func _draw_face(rect: Rect2) -> void:
 	var ink: Color = _suit_color(suit_text)
 
 	_draw_card_base(rect, FACE_BG, FACE_BORDER, 2, Color(0, 0, 0, 0.30))
-	var inner: Rect2 = rect.grow(-4)
+	var inner: Rect2 = rect.grow(-4 * ui_scale)
 	_draw_round_rect(inner, FACE_INNER, Color(0, 0, 0, 0), 0, CORNER_RADIUS - 2)
-	_draw_corner_pip(rect.position + Vector2(12, 8), rank_text, suit_symbol, ink, false)
-	_draw_corner_pip(rect.end - Vector2(12, 8), rank_text, suit_symbol, ink, true)
+	_draw_corner_pip(rect.position + Vector2(12, 8) * ui_scale, rank_text, suit_symbol, ink, false)
+	_draw_corner_pip(rect.end - Vector2(12, 8) * ui_scale, rank_text, suit_symbol, ink, true)
 
 	var center: Vector2 = rect.get_center()
 	var watermark: Color = Color(ink.r, ink.g, ink.b, 0.08)
-	_draw_center_suit(center + Vector2(0, 1), suit_symbol, watermark, 42)
-	_draw_center_suit(center + Vector2(0, 2), suit_symbol, ink, 36)
+	_draw_center_suit(center + Vector2(0, 1) * ui_scale, suit_symbol, watermark, 42)
+	_draw_center_suit(center + Vector2(0, 2) * ui_scale, suit_symbol, ink, 36)
 
 func _draw_back(rect: Rect2) -> void:
 	_draw_card_base(rect, BACK_BG, Color(0.44, 0.58, 0.92), 2, Color(0, 0, 0, 0.42))
-	var inner: Rect2 = rect.grow(-6)
+	var inner: Rect2 = rect.grow(-6 * ui_scale)
 	_draw_round_rect(inner, Color(0.075, 0.145, 0.315), Color(0.92, 0.78, 0.42, 0.82), 1, CORNER_RADIUS - 2)
 
 	var center: Vector2 = rect.get_center()
-	for radius in [22.0, 16.0, 10.0]:
+	for radius in [22.0 * ui_scale, 16.0 * ui_scale, 10.0 * ui_scale]:
 		draw_arc(center, radius, 0.0, TAU, 64, Color(BACK_INK.r, BACK_INK.g, BACK_INK.b, 0.42), 1.2, true)
 
-	for offset in [-18.0, -9.0, 0.0, 9.0, 18.0]:
-		draw_line(Vector2(inner.position.x + 5, center.y + offset), Vector2(inner.end.x - 5, center.y - offset), Color(BACK_INK.r, BACK_INK.g, BACK_INK.b, 0.18), 1.0, true)
-		draw_line(Vector2(inner.position.x + 5, center.y - offset), Vector2(inner.end.x - 5, center.y + offset), Color(BACK_INK.r, BACK_INK.g, BACK_INK.b, 0.12), 1.0, true)
+	for offset in [-18.0 * ui_scale, -9.0 * ui_scale, 0.0, 9.0 * ui_scale, 18.0 * ui_scale]:
+		draw_line(Vector2(inner.position.x + 5 * ui_scale, center.y + offset), Vector2(inner.end.x - 5 * ui_scale, center.y - offset), Color(BACK_INK.r, BACK_INK.g, BACK_INK.b, 0.18), 1.0, true)
+		draw_line(Vector2(inner.position.x + 5 * ui_scale, center.y - offset), Vector2(inner.end.x - 5 * ui_scale, center.y + offset), Color(BACK_INK.r, BACK_INK.g, BACK_INK.b, 0.12), 1.0, true)
 
 	_draw_center_suit(center, "◆", BACK_GOLD, 22)
-	_draw_corner_mark(rect.position + Vector2(12, 13), BACK_GOLD)
-	_draw_corner_mark(rect.end - Vector2(12, 13), BACK_GOLD)
+	_draw_corner_mark(rect.position + Vector2(12, 13) * ui_scale, BACK_GOLD)
+	_draw_corner_mark(rect.end - Vector2(12, 13) * ui_scale, BACK_GOLD)
 
 func _draw_card_base(rect: Rect2, fill: Color, border: Color, border_width: int, shadow: Color) -> void:
-	var shadow_rect: Rect2 = rect.grow(-1)
-	shadow_rect.position += Vector2(0, 2)
+	var shadow_rect: Rect2 = rect.grow(-1 * ui_scale)
+	shadow_rect.position += Vector2(0, 2) * ui_scale
 	_draw_round_rect(shadow_rect, shadow, Color(0, 0, 0, 0), 0, CORNER_RADIUS)
 	_draw_round_rect(rect.grow(-1), fill, border, border_width, CORNER_RADIUS)
 
@@ -115,27 +125,29 @@ func _draw_round_rect(rect: Rect2, fill: Color, border: Color, border_width: int
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = fill
 	style.border_color = border
-	style.border_width_left = border_width
-	style.border_width_top = border_width
-	style.border_width_right = border_width
-	style.border_width_bottom = border_width
-	style.corner_radius_top_left = radius
-	style.corner_radius_top_right = radius
-	style.corner_radius_bottom_left = radius
-	style.corner_radius_bottom_right = radius
+	var scaled_border: int = maxi(1, roundi(border_width * ui_scale)) if border_width > 0 else 0
+	var scaled_radius: int = maxi(1, roundi(radius * ui_scale)) if radius > 0 else 0
+	style.border_width_left = scaled_border
+	style.border_width_top = scaled_border
+	style.border_width_right = scaled_border
+	style.border_width_bottom = scaled_border
+	style.corner_radius_top_left = scaled_radius
+	style.corner_radius_top_right = scaled_radius
+	style.corner_radius_bottom_left = scaled_radius
+	style.corner_radius_bottom_right = scaled_radius
 	draw_style_box(style, rect)
 
 func _draw_corner_pip(origin: Vector2, rank: String, suit: String, ink: Color, flipped: bool) -> void:
 	var font: Font = get_theme_default_font()
 	if flipped:
 		draw_set_transform(origin, PI, Vector2.ONE)
-		_draw_text_centered(font, Vector2(0, 10), rank, 15, ink, 24)
-		_draw_text_centered(font, Vector2(0, 25), suit, 13, ink, 24)
+		_draw_text_centered(font, Vector2(0, 10) * ui_scale, rank, 15, ink, 24)
+		_draw_text_centered(font, Vector2(0, 25) * ui_scale, suit, 13, ink, 24)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 
-	_draw_text_centered(font, origin + Vector2(0, 10), rank, 15, ink, 24)
-	_draw_text_centered(font, origin + Vector2(0, 25), suit, 13, ink, 24)
+	_draw_text_centered(font, origin + Vector2(0, 10) * ui_scale, rank, 15, ink, 24)
+	_draw_text_centered(font, origin + Vector2(0, 25) * ui_scale, suit, 13, ink, 24)
 
 func _draw_corner_mark(origin: Vector2, ink: Color) -> void:
 	var font: Font = get_theme_default_font()
@@ -146,9 +158,11 @@ func _draw_center_suit(center: Vector2, suit: String, ink: Color, font_size: int
 	_draw_text_centered(font, center, suit, font_size, ink, 56)
 
 func _draw_text_centered(font: Font, center: Vector2, text: String, font_size: int, ink: Color, width: float) -> void:
-	var text_size: Vector2 = font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size)
-	var pos: Vector2 = center - Vector2(width * 0.5, text_size.y * 0.5) + Vector2(0, font_size * 0.78)
-	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size, ink)
+	var scaled_font_size: int = maxi(1, roundi(font_size * ui_scale))
+	var scaled_width: float = width * ui_scale
+	var text_size: Vector2 = font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, scaled_width, scaled_font_size)
+	var pos: Vector2 = center - Vector2(scaled_width * 0.5, text_size.y * 0.5) + Vector2(0, scaled_font_size * 0.78)
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, scaled_width, scaled_font_size, ink)
 
 func _suit_symbol(suit: String) -> String:
 	match suit:
